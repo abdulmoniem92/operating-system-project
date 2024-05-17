@@ -1,0 +1,52 @@
+#!/bin/bash
+
+read -p "Please Share Source Dir : " source_dir
+
+read -p "Please Share backup dir path: " backups_dir
+
+read -p "Please choose daily , weekly or monthly for  backup period : " back_period
+
+if [ $back_period = "daily" ] ; then 
+
+read -p "Please Share the daily cron schedule Time : " cron_schedule_time
+read -p "Please Share the retention days  (please put value with this format "+3") : " days
+
+mkdir -p $backups_dir/daily
+rsync -av  $source_dir $backups_dir/daily/${source_dir}_Backup_$(date +%d-%m-%Y_%H-%M-%S) > $backups_dir/daily/${source_dir}_Backup-$(date +%d-%m-%Y_%H-%M).log
+find $backups_dir/daily/* -ctime $days  -exec rm -Rf {} \;
+crontab -l > cron_job
+echo "$cron_schedule_time  rsync -av $source_dir  $backups_dir/daily/${source_dir}_Backup_$(date +\%d)" >> cron_job
+crontab cron_job
+rm cron_job
+
+elif [ $back_period = "weekly" ] ; then
+
+read -p "Please Share the the weekly cron schedule Time : " cron_schedule_time
+read -p "Please Share the retention days  (please put value with this format "+3") : " days
+mkdir -p $backups_dir/weekly
+rsync -av  $source_dir $backups_dir/weekly/${source_dir}_Backup_$(date +%d-%m-%Y_%H-%M-%S) > $backups_dir/weekly/${source_dir}_Backup-$(date +%d-%m-%Y_%H-%M).log
+find $backups_dir/weekly/* -ctime $days  -exec rm -Rf {} \;
+crontab -l > cron_job
+echo "$cron_schedule_time  rsync -av $source_dir  $backups_dir/weekly/${source_dir}_Backup_$(date +%d-%m-%Y_%H-%M-%S)" >> cron_job
+crontab cron_job
+rm cron_job
+
+elif [ $back_period = "monthly" ] ; then
+read -p "Please Share the the monthly cron schedule Time : " cron_schedule_time
+read -p "Please Share the retention days  (please put value with this format "+3") : " days
+mkdir -p $backups_dir/monthly
+rsync -av  $source_dir $backups_dir/monthly/${source_dir}_Backup_$(date +%d-%m-%Y_%H-%M-%S) > $backups_dir/monthly/${source_dir}_Backup-$(date +%d-%m-%Y_%H-%M).log
+find $backups_dir/monthly/* -ctime $days  -exec rm -Rf {} \;
+crontab -l > cron_job
+echo "$cron_schedule_time  rsync -av $source_dir  $backups_dir/monthly/${source_dir}_Backup_$(date +%d-%m-%Y_%H-%M-%S)" >> cron_job
+crontab cron_job
+rm cron_job
+
+else
+	exit
+fi
+
+echo "Backup completed successfully"
+
+exit 0
+
